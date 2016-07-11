@@ -297,6 +297,7 @@ public class ChartLegend: ChartComponentBase
     /// 
     /// **default**: 0.95 (95%)
     public var maxSizePercent: CGFloat = 0.95
+    public var numbersOfLineInHorizontalMode: Int = 0
     
     public func calculateDimensions(labelFont labelFont: NSUIFont, viewPortHandler: ChartViewPortHandler)
     {
@@ -481,8 +482,17 @@ public class ChartLegend: ChartComponentBase
             }
             
             neededWidth = maxLineWidth
-            neededHeight = labelLineHeight * CGFloat(calculatedLineSizes.count) +
-                yEntrySpace * CGFloat(calculatedLineSizes.count == 0 ? 0 : (calculatedLineSizes.count - 1))
+            if numbersOfLineInHorizontalMode > 0 {
+                var clsCount = calculatedLineSizes.count
+                if clsCount > numbersOfLineInHorizontalMode {
+                    clsCount = numbersOfLineInHorizontalMode
+                }
+                neededHeight = labelLineHeight * CGFloat(clsCount) +
+                    yEntrySpace * CGFloat(clsCount == 0 ? 0 : (clsCount - 1))
+            } else {
+                neededHeight = labelLineHeight * CGFloat(calculatedLineSizes.count) +
+                    yEntrySpace * CGFloat(calculatedLineSizes.count == 0 ? 0 : (calculatedLineSizes.count - 1))
+            }
         }
     }
     

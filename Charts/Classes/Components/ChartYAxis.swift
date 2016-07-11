@@ -254,7 +254,34 @@ public class ChartYAxis: ChartAxisBase
             return ""
         }
         
-        return (valueFormatter ?? _defaultValueFormatter).stringFromNumber(entries[index])!
+        var diff = entries[1]-entries[0]
+        var number = entries[index]
+        
+        if diff < 1000 {
+            return (valueFormatter ?? _defaultValueFormatter).stringFromNumber(number)!
+        }
+        diff = diff / 1000
+        number = number / 1000
+        
+        if diff < 1000 {
+            return (valueFormatter ?? _defaultValueFormatter).stringFromNumber(number)! + "K"
+        }
+        diff = diff / 1000
+        number = number / 1000
+        
+        if diff < 1000 {
+            return (valueFormatter ?? _defaultValueFormatter).stringFromNumber(number)! + "M"
+        }
+        diff = diff / 1000
+        number = number / 1000
+        
+        if diff < 1000 {
+            return (valueFormatter ?? _defaultValueFormatter).stringFromNumber(number)! + "B"
+        }
+        diff = diff / 1000
+        number = number / 1000
+        
+        return (valueFormatter ?? _defaultValueFormatter).stringFromNumber(number)! + "T"
     }
     
     /// - returns: true if this axis needs horizontal offset, false if no offset is needed.
