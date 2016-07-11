@@ -167,43 +167,85 @@ public class ChartXAxisRenderer: ChartAxisRendererBase
             labelMaxSize.width = xAxis.wordWrapWidthPercent * valueToPixelMatrix.a
         }
         
-        for i in self.minX.stride(to: min(self.maxX + 1, xAxis.values.count), by: xAxis.axisLabelModulus)
-        {
-            let label = xAxis.values[i]
-            if (label == nil)
-            {
-                continue
-            }
-            
-            position.x = CGFloat(i)
-            position.y = 0.0
-            position = CGPointApplyAffineTransform(position, valueToPixelMatrix)
-            
-            if (viewPortHandler.isInBoundsX(position.x))
-            {
-                let labelns = label! as NSString
-                
-                if (xAxis.isAvoidFirstLastClippingEnabled)
+        if xAxis.axisLabelManuals.count > 0 {
+            for i in xAxis.axisLabelManuals {
+                let label = xAxis.values[i]
+                if (label == nil)
                 {
-                    // avoid clipping of the last
-                    if (i == xAxis.values.count - 1 && xAxis.values.count > 1)
-                    {
-                        let width = labelns.boundingRectWithSize(labelMaxSize, options: .UsesLineFragmentOrigin, attributes: labelAttrs, context: nil).size.width
-                        
-                        if (width > viewPortHandler.offsetRight * 2.0
-                            && position.x + width > viewPortHandler.chartWidth)
-                        {
-                            position.x -= width / 2.0
-                        }
-                    }
-                    else if (i == 0)
-                    { // avoid clipping of the first
-                        let width = labelns.boundingRectWithSize(labelMaxSize, options: .UsesLineFragmentOrigin, attributes: labelAttrs, context: nil).size.width
-                        position.x += width / 2.0
-                    }
+                    continue
                 }
                 
-                drawLabel(context: context, label: label!, xIndex: i, x: position.x, y: pos, attributes: labelAttrs, constrainedToSize: labelMaxSize, anchor: anchor, angleRadians: labelRotationAngleRadians)
+                position.x = CGFloat(i)
+                position.y = 0.0
+                position = CGPointApplyAffineTransform(position, valueToPixelMatrix)
+                
+                if (viewPortHandler.isInBoundsX(position.x))
+                {
+                    let labelns = label! as NSString
+                    
+                    if (xAxis.isAvoidFirstLastClippingEnabled)
+                    {
+                        // avoid clipping of the last
+                        if (i == xAxis.values.count - 1 && xAxis.values.count > 1)
+                        {
+                            let width = labelns.boundingRectWithSize(labelMaxSize, options: .UsesLineFragmentOrigin, attributes: labelAttrs, context: nil).size.width
+                            
+                            if (width > viewPortHandler.offsetRight * 2.0
+                                && position.x + width > viewPortHandler.chartWidth)
+                            {
+                                position.x -= width / 2.0
+                            }
+                        }
+                        else if (i == 0)
+                        { // avoid clipping of the first
+                            let width = labelns.boundingRectWithSize(labelMaxSize, options: .UsesLineFragmentOrigin, attributes: labelAttrs, context: nil).size.width
+                            position.x += width / 2.0
+                        }
+                    }
+                    
+                    drawLabel(context: context, label: label!, xIndex: i, x: position.x, y: pos, attributes: labelAttrs, constrainedToSize: labelMaxSize, anchor: anchor, angleRadians: labelRotationAngleRadians)
+                }
+            }
+
+        } else {
+            for i in self.minX.stride(to: min(self.maxX + 1, xAxis.values.count), by: xAxis.axisLabelModulus)
+            {
+                let label = xAxis.values[i]
+                if (label == nil)
+                {
+                    continue
+                }
+                
+                position.x = CGFloat(i)
+                position.y = 0.0
+                position = CGPointApplyAffineTransform(position, valueToPixelMatrix)
+                
+                if (viewPortHandler.isInBoundsX(position.x))
+                {
+                    let labelns = label! as NSString
+                    
+                    if (xAxis.isAvoidFirstLastClippingEnabled)
+                    {
+                        // avoid clipping of the last
+                        if (i == xAxis.values.count - 1 && xAxis.values.count > 1)
+                        {
+                            let width = labelns.boundingRectWithSize(labelMaxSize, options: .UsesLineFragmentOrigin, attributes: labelAttrs, context: nil).size.width
+                            
+                            if (width > viewPortHandler.offsetRight * 2.0
+                                && position.x + width > viewPortHandler.chartWidth)
+                            {
+                                position.x -= width / 2.0
+                            }
+                        }
+                        else if (i == 0)
+                        { // avoid clipping of the first
+                            let width = labelns.boundingRectWithSize(labelMaxSize, options: .UsesLineFragmentOrigin, attributes: labelAttrs, context: nil).size.width
+                            position.x += width / 2.0
+                        }
+                    }
+                    
+                    drawLabel(context: context, label: label!, xIndex: i, x: position.x, y: pos, attributes: labelAttrs, constrainedToSize: labelMaxSize, anchor: anchor, angleRadians: labelRotationAngleRadians)
+                }
             }
         }
     }
@@ -247,20 +289,38 @@ public class ChartXAxisRenderer: ChartAxisRendererBase
         
         var position = CGPoint(x: 0.0, y: 0.0)
         
-        for i in self.minX.stride(to: self.maxX, by: xAxis.axisLabelModulus)
-        {
-            position.x = CGFloat(i)
-            position.y = 0.0
-            position = CGPointApplyAffineTransform(position, valueToPixelMatrix)
-            
-            if (position.x >= viewPortHandler.offsetLeft
-                && position.x <= viewPortHandler.chartWidth)
+        if xAxis.axisLabelManuals.count > 0 {
+            for i in xAxis.axisLabelManuals {
+                position.x = CGFloat(i)
+                position.y = 0.0
+                position = CGPointApplyAffineTransform(position, valueToPixelMatrix)
+                
+                if (position.x >= viewPortHandler.offsetLeft
+                    && position.x <= viewPortHandler.chartWidth)
+                {
+                    _gridLineSegmentsBuffer[0].x = position.x
+                    _gridLineSegmentsBuffer[0].y = viewPortHandler.contentTop
+                    _gridLineSegmentsBuffer[1].x = position.x
+                    _gridLineSegmentsBuffer[1].y = viewPortHandler.contentBottom
+                    CGContextStrokeLineSegments(context, _gridLineSegmentsBuffer, 2)
+                }
+            }
+        } else {
+            for i in self.minX.stride(to: self.maxX, by: xAxis.axisLabelModulus)
             {
-                _gridLineSegmentsBuffer[0].x = position.x
-                _gridLineSegmentsBuffer[0].y = viewPortHandler.contentTop
-                _gridLineSegmentsBuffer[1].x = position.x
-                _gridLineSegmentsBuffer[1].y = viewPortHandler.contentBottom
-                CGContextStrokeLineSegments(context, _gridLineSegmentsBuffer, 2)
+                position.x = CGFloat(i)
+                position.y = 0.0
+                position = CGPointApplyAffineTransform(position, valueToPixelMatrix)
+                
+                if (position.x >= viewPortHandler.offsetLeft
+                    && position.x <= viewPortHandler.chartWidth)
+                {
+                    _gridLineSegmentsBuffer[0].x = position.x
+                    _gridLineSegmentsBuffer[0].y = viewPortHandler.contentTop
+                    _gridLineSegmentsBuffer[1].x = position.x
+                    _gridLineSegmentsBuffer[1].y = viewPortHandler.contentBottom
+                    CGContextStrokeLineSegments(context, _gridLineSegmentsBuffer, 2)
+                }
             }
         }
         

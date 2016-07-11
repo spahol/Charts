@@ -240,6 +240,7 @@ public class ChartLegendRenderer: ChartRendererBase
             }
             
             var lineIndex: Int = 0
+            let startPosY = posY
             
             for i in 0..<labels.count
             {
@@ -247,6 +248,12 @@ public class ChartLegendRenderer: ChartRendererBase
                 {
                     posX = originPosX
                     posY += labelLineHeight + yEntrySpace
+                    
+                    if legend.numbersOfLineInHorizontalMode > 0 {
+                        if posY > startPosY+(CGFloat(legend.numbersOfLineInHorizontalMode-1)*(labelLineHeight+yEntrySpace)) {
+                            break
+                        }
+                    }
                 }
                 
                 if (posX == originPosX &&
